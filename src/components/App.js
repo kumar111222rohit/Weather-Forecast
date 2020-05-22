@@ -63,99 +63,105 @@ const WeatherWrapper = styled.div`
 
 class App extends React.Component {
   state = {
-    value: '',
+    value: 'KathMandu',
     weatherInfo: null,
     error: false,
   };
+  componentDidMount() {
+    this.handleSearchCity(this.state.value)
+  }
 
-  handleInputChange = e => {
-
-
+  handleInputChange = (cityValue,e) => {
     this.setState({
-      value: e.target.value,
+      value:cityValue,
     });
   };
 
-  handleSearchCity = e => {
-    e.preventDefault();
-    const { value } = this.state;
-    const APIkey = process.env.REACT_APP_API_KEY;
+  handleSearchCity = (eachCityValue,e) => {
+    if(e){
+      e.preventDefault();
+    }
+    if(eachCityValue){
+      let  value  = eachCityValue;
+      const APIkey = process.env.REACT_APP_API_KEY;
 
-    const weather = `https://api.openweathermap.org/data/2.5/weather?q=${value}&APPID=${APIkey}&units=metric`;
-    const forecast = `https://api.openweathermap.org/data/2.5/forecast?q=${value}&APPID=${APIkey}&units=metric`;
+      const weather = `https://api.openweathermap.org/data/2.5/weather?q=${value}&APPID=${APIkey}&units=metric`;
+      const forecast = `https://api.openweathermap.org/data/2.5/forecast?q=${value}&APPID=${APIkey}&units=metric`;
 
-    Promise.all([fetch(weather), fetch(forecast)])
-      .then(([res1, res2]) => {
-        if (res1.ok && res2.ok) {
-          return Promise.all([res1.json(), res2.json()]);
-        }
-        throw Error(res1.statusText, res2.statusText);
-      })
-      .then(([data1, data2]) => {
-        const months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'Nocvember',
-          'December',
-        ];
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const currentDate = new Date();
-        const date = `${days[currentDate.getDay()]} ${currentDate.getDate()} ${
-          months[currentDate.getMonth()]
-        }`;
-        const sunset = new Date(data1.sys.sunset * 1000).toLocaleTimeString().slice(0, 5);
-        const sunrise = new Date(data1.sys.sunrise * 1000).toLocaleTimeString().slice(0, 5);
+      Promise.all([fetch(weather), fetch(forecast)])
+          .then(([res1, res2]) => {
+            if (res1.ok && res2.ok) {
+              return Promise.all([res1.json(), res2.json()]);
+            }
+            throw Error(res1.statusText, res2.statusText);
+          })
+          .then(([data1, data2]) => {
+            const months = [
+              'January',
+              'February',
+              'March',
+              'April',
+              'May',
+              'June',
+              'July',
+              'August',
+              'September',
+              'October',
+              'November',
+              'December',
+            ];
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const currentDate = new Date();
+            const date = `${days[currentDate.getDay()]} ${currentDate.getDate()} ${
+                months[currentDate.getMonth()]
+            }`;
+            const sunset = new Date(data1.sys.sunset * 1000).toLocaleTimeString().slice(0, 5);
+            const sunrise = new Date(data1.sys.sunrise * 1000).toLocaleTimeString().slice(0, 5);
 
-        const weatherInfo = {
-          city: data1.name,
-          country: data1.sys.country,
-          date,
-          description: data1.weather[0].description,
-          main: data1.weather[0].main,
-          temp: data1.main.temp,
-          highestTemp: data1.main.temp_max,
-          lowestTemp: data1.main.temp_min,
-          sunrise,
-          sunset,
-          clouds: data1.clouds.all,
-          humidity: data1.main.humidity,
-          wind: data1.wind.speed,
-          forecast: data2.list,
-        };
-        this.setState({
-          weatherInfo,
-          error: false,
-        });
-      })
-      .catch(error => {
-        console.log(error);
+            const weatherInfo = {
+              city: data1.name,
+              country: data1.sys.country,
+              date,
+              description: data1.weather[0].description,
+              main: data1.weather[0].main,
+              temp: data1.main.temp,
+              highestTemp: data1.main.temp_max,
+              lowestTemp: data1.main.temp_min,
+              sunrise,
+              sunset,
+              clouds: data1.clouds.all,
+              humidity: data1.main.humidity,
+              wind: data1.wind.speed,
+              forecast: data2.list,
+            };
+            this.setState({
+              weatherInfo,
+              error: false,
+            });
+          })
+          .catch(error => {
+            console.log(error);
 
-        this.setState({
-          error: true,
-          weatherInfo: null,
-        });
-      });
+            this.setState({
+              error: true,
+              weatherInfo: null,
+            });
+          });
+    }
+
   };
 
   render() {
     const { value, weatherInfo, error } = this.state;
     return (
       <>
-        <AppTitle showLabel={(weatherInfo || error) && true}>Weather app</AppTitle>
+        <AppTitle showLabel={(weatherInfo || error) && true}>Weather Forecast</AppTitle>
         <WeatherWrapper>
           <AppTitle secondary showResult={(weatherInfo || error) && true}>
             Weather Forecast
           </AppTitle>
           <SearchCity
-            value={value}
+              value={value}
             showResult={(weatherInfo || error) && true}
             change={this.handleInputChange}
             submit={this.handleSearchCity}
